@@ -1,21 +1,10 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
 metadata:
   name: argocd
   namespace: argocd
 spec:
-  ingressClassName: tailscale
-  tls:
-    - hosts:
-        - argocd-au
-  rules:
-    - host: argocd-au
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: argocd-server
-                port:
-                  number: 80
+  hostname: argocd-au
+  subnetRouter:
+    advertiseRoutes: []
+  proxyClass: default
