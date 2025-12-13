@@ -1,0 +1,10 @@
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  hostname: longhorn-au
+  subnetRouter:
+    advertiseRoutes: []
+  proxyClass: default
