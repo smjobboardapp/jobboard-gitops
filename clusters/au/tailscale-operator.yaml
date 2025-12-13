@@ -15,7 +15,7 @@ spec:
           clientId: kSBztUWaZs11CNTRL
           clientSecret: tskey-client-kSBztUWaZs11CNTRL-BiP7NvsVqx9pW5noPWzAx94yh6dvE7FE
         apiServerProxyConfig:
-          mode: true
+          mode: "true"
         operatorConfig:
           hostname: tailscale-operator
           defaultTags:
