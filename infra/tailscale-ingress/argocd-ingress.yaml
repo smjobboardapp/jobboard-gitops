@@ -1,9 +1,21 @@
 apiVersion: tailscale.com/v1alpha1
-kind: Connector
+kind: Ingress
 metadata:
   name: argocd
   namespace: argocd
 spec:
-  hostname: argocd-au
-  tags:
-    - tag:k8s-operator
+  class: tailscale
+  tls:
+    hosts:
+      - argocd-au
+  rules:
+    - host: argocd-au
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
