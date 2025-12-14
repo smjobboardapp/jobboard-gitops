@@ -11,9 +11,6 @@ spec:
     targetRevision: 1.78.3
     helm:
       valuesObject:
-        oauth:
-          clientId: ""
-          clientSecret: ""
         operatorConfig:
           hostname: tailscale-operator
           defaultTags:
