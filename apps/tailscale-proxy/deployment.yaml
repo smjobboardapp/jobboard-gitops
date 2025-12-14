@@ -37,7 +37,7 @@ metadata:
   name: tailscale-auth
   namespace: argocd
 stringData:
-  TS_AUTHKEY: tskey-auth-kikwVy1Eh211CNTRL-kkMpuSPXgvghMgWkQaJ4vgrK86hF95Nqg
+  TS_AUTHKEY: tskey-auth-kqQG4dmmAz11CNTRL-mQFgyx9Vxe5G7tX3ZzyHe5GVxCzvafDz
 ---
 apiVersion: apps/v1
 kind: Deployment
