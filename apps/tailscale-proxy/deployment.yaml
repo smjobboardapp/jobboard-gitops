@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tailscale-env
+  namespace: argocd
+data:
+  TS_AUTHKEY: tskey-auth-kikwVy1Eh211CNTRL-kkMpuSPXgvghMgWkQaJ4vgrK86hF95Nqg
+  TS_HOSTNAME: argocd-au
+  TS_STATE_DIR: /var/lib/tailscale
+  TS_USERSPACE: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tailscale-proxy
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tailscale-proxy
+  template:
+    metadata:
+      labels:
+        app: tailscale-proxy
+    spec:
+      containers:
+      - name: tailscale
+        image: tailscale/tailscale:latest
+        envFrom:
+        - configMapRef:
+            name: tailscale-env
+        command:
+        - sh
+        - -c
+        - |
+          /usr/local/bin/containerboot &
+          sleep 10
+          tailscale serve --bg --https=443 http://argocd-server.argocd.svc.cluster.local:80
+          wait
+        volumeMounts:
+        - name: state
+          mountPath: /var/lib/tailscale
+      volumes:
+      - name: state
+        emptyDir: {}
