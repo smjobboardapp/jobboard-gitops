@@ -1,13 +1,43 @@
 apiVersion: v1
-kind: ConfigMap
+kind: ServiceAccount
 metadata:
-  name: tailscale-env
+  name: tailscale
   namespace: argocd
-data:
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: tailscale
+  namespace: argocd
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "create", "update", "patch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: tailscale
+  namespace: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: tailscale
+subjects:
+- kind: ServiceAccount
+  name: tailscale
+  namespace: argocd
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tailscale-auth
+  namespace: argocd
+stringData:
   TS_AUTHKEY: tskey-auth-kikwVy1Eh211CNTRL-kkMpuSPXgvghMgWkQaJ4vgrK86hF95Nqg
-  TS_HOSTNAME: argocd-au
-  TS_STATE_DIR: /var/lib/tailscale
-  TS_USERSPACE: "true"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,23 +54,37 @@ spec:
       labels:
         app: tailscale-proxy
     spec:
+      serviceAccountName: tailscale
       containers:
       - name: tailscale
         image: tailscale/tailscale:latest
-        envFrom:
-        - configMapRef:
-            name: tailscale-env
+        env:
+        - name: TS_AUTHKEY
+          valueFrom:
+            secretKeyRef:
+              name: tailscale-auth
+              key: TS_AUTHKEY
+        - name: TS_HOSTNAME
+          value: "argocd-au"
+        - name: TS_STATE_DIR
+          value: "/var/lib/tailscale"
+        - name: TS_USERSPACE
+          value: "true"
+        - name: TS_SERVE_CONFIG
+          value: "/config/serve.json"
         command:
         - sh
         - -c
         - |
-          /usr/local/bin/containerboot &
-          sleep 10
-          tailscale serve --bg --https=443 http://argocd-server.argocd.svc.cluster.local:80
-          wait
+          echo '{"TCP":{"443":{"HTTPS":true}},"Web":{"${TS_HOSTNAME}:443":{"/":{"Proxy":"http://argocd-server.argocd.svc:80"}}}}' > /config/serve.json
+          exec /usr/local/bin/containerboot
         volumeMounts:
         - name: state
           mountPath: /var/lib/tailscale
+        - name: config
+          mountPath: /config
       volumes:
       - name: state
+        emptyDir: {}
+      - name: config
         emptyDir: {}
