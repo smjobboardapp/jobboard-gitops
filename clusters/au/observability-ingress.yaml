@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability-ingress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/smjobboardapp/jobboard-gitops.git
+    targetRevision: HEAD
+    path: infra/observability/ingress
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
