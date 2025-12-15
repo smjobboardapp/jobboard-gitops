@@ -9,6 +9,5 @@ singleBinary:
     enabled: true
     size: 20Gi
 
-# Keep it minimal; no ingress. Grafana will talk to it internally.
 gateway:
   enabled: true

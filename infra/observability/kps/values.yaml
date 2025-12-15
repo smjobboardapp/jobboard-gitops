@@ -1,5 +1,3 @@
-# Minimal, LAN-safe kube-prometheus-stack.
-# Persistence uses default StorageClass (Longhorn).
 grafana:
   enabled: true
   service:
