@@ -33,7 +33,6 @@ prometheus:
     retention: 7d
 
     # Prevent ArgoCD/CRD schema mismatch errors in clusters where this field isn't supported
-    enableOTLPReceiver: false
 
     storageSpec:
       volumeClaimTemplate:
