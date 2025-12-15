@@ -32,3 +32,7 @@ alertmanager:
           resources:
             requests:
               storage: 2Gi
+
+# CRDs are installed separately via prometheus-operator-crds chart
+crds:
+  enabled: false
