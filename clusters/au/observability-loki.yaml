@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://github.com/grafana/helm-charts.git
       targetRevision: main
-      path: charts/loki
+      path: charts/loki-stack
       helm:
         valueFiles:
           - $values/infra/observability/loki/values.yaml
