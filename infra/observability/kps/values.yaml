@@ -17,6 +17,10 @@ grafana:
       jsonData:
         timeInterval: 10s
 
+  persistence:
+    enabled: false
+
+
   service:
     type: ClusterIP
 
