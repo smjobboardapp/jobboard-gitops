@@ -6,15 +6,11 @@ loki:
     size: 20Gi
   config:
     auth_enabled: false
-
 promtail:
-  enabled: true
-
+  enabled: false
 grafana:
   enabled: false
-
 prometheus:
   enabled: false
-
 fluent-bit:
   enabled: false
