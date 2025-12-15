@@ -1,18 +1,40 @@
+# kube-prometheus-stack values
+# Phase 6 Observability: Prometheus + Grafana + (provisioned) Loki datasource
+# CRDs are installed separately via prometheus-operator-crds chart
+
+crds:
+  enabled: false
+
 grafana:
   enabled: true
+
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      access: proxy
+      url: http://observability-loki.loki.svc.cluster.local:3100
+      isDefault: false
+      jsonData:
+        timeInterval: 10s
+
   service:
     type: ClusterIP
+
   ingress:
     enabled: false
+
   persistence:
     enabled: true
     size: 5Gi
 
 prometheus:
-  ingress:
-    enabled: false
   prometheusSpec:
+    # Keep retention modest for your current storage footprint
     retention: 7d
+
+    # Prevent ArgoCD/CRD schema mismatch errors in clusters where this field isn't supported
+    enableOTLPReceiver: false
+
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -24,6 +46,7 @@ prometheus:
 alertmanager:
   ingress:
     enabled: false
+
   alertmanagerSpec:
     storage:
       volumeClaimTemplate:
@@ -33,6 +56,3 @@ alertmanager:
             requests:
               storage: 2Gi
 
-# CRDs are installed separately via prometheus-operator-crds chart
-crds:
-  enabled: false
