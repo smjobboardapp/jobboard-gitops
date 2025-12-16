@@ -6,7 +6,8 @@ metadata:
   annotations:
     strimzi.io/node-pools: "enabled"
     strimzi.io/kraft: "enabled"
-spec:  kafka:
+spec:
+  kafka:
     version: 4.1.1
     replicas: 3
 
