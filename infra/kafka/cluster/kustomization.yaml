@@ -5,3 +5,4 @@ namespace: kafka
 
 resources:
   - kafka.yaml
+  - nodepool.yaml

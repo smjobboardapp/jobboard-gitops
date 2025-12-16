@@ -4,6 +4,8 @@ metadata:
   name: jobboard-kafka
   namespace: kafka
 spec:
+  kafkaNodePools:
+    enabled: true
   kafka:
     version: 4.1.1
     replicas: 3
