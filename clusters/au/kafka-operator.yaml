@@ -3,32 +3,18 @@ kind: Application
 metadata:
   name: kafka-strimzi-operator
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
-  
   source:
     repoURL: https://strimzi.io/charts/
     chart: strimzi-kafka-operator
-    targetRevision: 0.43.0
+    targetRevision: 0.44.0
     helm:
-      values: |
+      valuesObject:
         watchNamespaces: []
-        resources:
-          requests:
-            cpu: 200m
-            memory: 384Mi
-          limits:
-            cpu: 1000m
-            memory: 512Mi
-        logLevel: INFO
-        replicas: 1
-  
   destination:
     server: https://kubernetes.default.svc
     namespace: kafka-operator
-  
   syncPolicy:
     automated:
       prune: true
@@ -41,3 +27,6 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m
+  info:
+    - name: 'sync-wave'
+      value: '1'
