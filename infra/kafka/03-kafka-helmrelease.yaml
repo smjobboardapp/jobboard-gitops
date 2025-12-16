@@ -1,0 +1,222 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kafka
+  namespace: kafka
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: kafka
+      version: "31.1.0"  # Latest stable version
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: kafka
+      interval: 12h
+  
+  # Automatic upgrade strategy
+  upgrade:
+    remediation:
+      retries: 3
+  
+  # Values for production deployment with KRaft (no Zookeeper)
+  values:
+    # KRaft mode configuration (modern Kafka without Zookeeper)
+    kraft:
+      enabled: true
+    
+    # Controller nodes (manage cluster metadata in KRaft mode)
+    controller:
+      replicaCount: 3
+      
+      persistence:
+        enabled: true
+        storageClass: "kafka-storage"
+        size: 10Gi
+      
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 2000m
+          memory: 2Gi
+      
+      # Anti-affinity to spread controllers across nodes
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/component
+                    operator: In
+                    values:
+                      - controller
+              topologyKey: kubernetes.io/hostname
+    
+    # Broker nodes (handle actual message traffic)
+    broker:
+      replicaCount: 3
+      
+      persistence:
+        enabled: true
+        storageClass: "kafka-storage"
+        size: 50Gi  # Adjust based on your data retention needs
+      
+      resources:
+        requests:
+          cpu: 1000m
+          memory: 2Gi
+        limits:
+          cpu: 4000m
+          memory: 4Gi
+      
+      # Kafka broker configuration
+      config: |
+        # Message retention
+        log.retention.hours=168
+        log.retention.bytes=1073741824
+        log.segment.bytes=536870912
+        
+        # Performance tuning
+        num.network.threads=8
+        num.io.threads=16
+        socket.send.buffer.bytes=102400
+        socket.receive.buffer.bytes=102400
+        socket.request.max.bytes=104857600
+        
+        # Replication
+        default.replication.factor=3
+        min.insync.replicas=2
+        
+        # Topic defaults
+        num.partitions=6
+        auto.create.topics.enable=false
+        
+        # Compression
+        compression.type=snappy
+      
+      # Anti-affinity to spread brokers across nodes
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/component
+                    operator: In
+                    values:
+                      - broker
+              topologyKey: kubernetes.io/hostname
+      
+      # Health checks
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+      
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 20
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+    
+    # Metrics and monitoring
+    metrics:
+      kafka:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+      
+      jmx:
+        enabled: true
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+    
+    # Service configuration
+    service:
+      type: ClusterIP
+      ports:
+        client: 9092
+        controller: 9093
+        interbroker: 9094
+        external: 9095
+    
+    # External access (if needed - commented out by default)
+    # externalAccess:
+    #   enabled: true
+    #   controller:
+    #     service:
+    #       type: LoadBalancer
+    #   broker:
+    #     service:
+    #       type: LoadBalancer
+    
+    # Security settings
+    auth:
+      # For production, enable SASL authentication
+      clientProtocol: PLAINTEXT  # Change to SASL_SSL for production
+      interBrokerProtocol: PLAINTEXT
+      controllerProtocol: PLAINTEXT
+      
+      # Enable SASL for production:
+      # sasl:
+      #   enabled: true
+      #   mechanism: scram-sha-512
+      #   interBrokerMechanism: scram-sha-512
+      #   controllerMechanism: scram-sha-512
+      #   users:
+      #     - admin
+      #   passwords:
+      #     - "change-this-password"
+    
+    # Provisioning - create topics at startup
+    provisioning:
+      enabled: true
+      topics:
+        - name: scraping-jobs
+          partitions: 12
+          replicationFactor: 3
+          config:
+            retention.ms: "604800000"  # 7 days
+            compression.type: "snappy"
+            min.insync.replicas: "2"
+        
+        - name: scraping-results
+          partitions: 12
+          replicationFactor: 3
+          config:
+            retention.ms: "2592000000"  # 30 days
+            compression.type: "snappy"
+            min.insync.replicas: "2"
+        
+        - name: job-updates
+          partitions: 12
+          replicationFactor: 3
+          config:
+            retention.ms: "2592000000"  # 30 days
+            compression.type: "snappy"
+            min.insync.replicas: "2"
+        
+        - name: dead-letter-queue
+          partitions: 6
+          replicationFactor: 3
+          config:
+            retention.ms: "2592000000"  # 30 days
+            compression.type: "snappy"
+            min.insync.replicas: "2"

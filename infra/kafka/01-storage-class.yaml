@@ -1,0 +1,20 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: kafka-storage
+  labels:
+    app.kubernetes.io/name: kafka
+provisioner: openebs.io/local
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+---
+# If you're using a CSI driver like OpenEBS or Longhorn, replace above with:
+# apiVersion: storage.k8s.io/v1
+# kind: StorageClass
+# metadata:
+#   name: kafka-storage
+# provisioner: openebs.io/local  # or your CSI provisioner
+# volumeBindingMode: WaitForFirstConsumer
+# allowVolumeExpansion: true
+# reclaimPolicy: Retain

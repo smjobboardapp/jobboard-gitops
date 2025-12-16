@@ -1,0 +1,78 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kafka-ui
+  namespace: kafka
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: kafka-ui
+      version: "0.7.6"
+      sourceRef:
+        kind: HelmRepository
+        name: kafka-ui
+        namespace: kafka
+      interval: 12h
+  
+  dependsOn:
+    - name: kafka
+      namespace: kafka
+  
+  values:
+    # Kafka UI configuration
+    yamlApplicationConfig:
+      kafka:
+        clusters:
+          - name: jobboard-kafka
+            bootstrapServers: kafka-broker-headless.kafka.svc.cluster.local:9092
+            metrics:
+              port: 9308
+              type: JMX
+      
+      auth:
+        type: disabled  # Enable for production
+      
+      management:
+        health:
+          ldap:
+            enabled: false
+    
+    # Resources
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+    
+    # Service
+    service:
+      type: ClusterIP
+      port: 8080
+    
+    # Ingress (optional - uncomment if using ingress controller)
+    # ingress:
+    #   enabled: true
+    #   ingressClassName: nginx
+    #   annotations:
+    #     cert-manager.io/cluster-issuer: letsencrypt-prod
+    #   hosts:
+    #     - host: kafka-ui.jobboard.app
+    #       paths:
+    #         - path: /
+    #           pathType: Prefix
+    #   tls:
+    #     - secretName: kafka-ui-tls
+    #       hosts:
+    #         - kafka-ui.jobboard.app
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: kafka-ui
+  namespace: kafka
+spec:
+  interval: 1h
+  url: https://provectus.github.io/kafka-ui-charts
