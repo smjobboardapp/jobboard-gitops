@@ -10,14 +10,13 @@ spec:
   roles:
     - controller
     - broker
+
   storage:
-    type: jbod
-    volumes:
-      - id: 0
-        type: persistent-claim
-        size: 20Gi
-        class: longhorn
-        deleteClaim: false
+    type: persistent-claim
+    size: 20Gi
+    class: longhorn
+    deleteClaim: false
+
   resources:
     requests:
       cpu: 500m
