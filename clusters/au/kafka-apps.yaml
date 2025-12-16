@@ -1,0 +1,91 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-cluster
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/smjobboardapp/jobboard-gitops.git
+    targetRevision: main
+    path: infra/kafka/cluster
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 5m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-ui
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/smjobboardapp/jobboard-gitops.git
+    targetRevision: main
+    path: infra/kafka/ui
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kafka-topics
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  project: default
+  
+  source:
+    repoURL: https://github.com/smjobboardapp/jobboard-gitops.git
+    targetRevision: main
+    path: infra/kafka/topics
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kafka
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m

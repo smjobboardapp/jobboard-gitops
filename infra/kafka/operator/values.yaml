@@ -1,0 +1,30 @@
+# Strimzi Kafka Operator Configuration
+# Manages Kafka clusters in Kubernetes
+
+# Watch all namespaces
+watchNamespaces: []
+
+# Operator resources
+resources:
+  requests:
+    cpu: 200m
+    memory: 384Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# Single replica
+replicas: 1
+
+# Logging level
+logLevel: INFO
+
+# Feature gates
+featureGates: ""
+
+# Network policies (disabled)
+generateNetworkPolicy: false
+
+# Run on any node
+tolerations: []
+nodeSelector: {}
