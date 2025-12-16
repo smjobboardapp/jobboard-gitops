@@ -6,7 +6,7 @@ metadata:
   labels:
     strimzi.io/cluster: jobboard-kafka
 spec:
-  replicas: 3
+  replicas: 0
   roles:
     - controller
     - broker
