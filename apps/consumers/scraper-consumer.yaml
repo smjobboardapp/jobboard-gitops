@@ -30,7 +30,10 @@ spec:
                 --bootstrap-server jobboard-kafka-kafka-bootstrap:9092 \
                 --topic scraper-tasks \
                 --group scraper-consumer-group \
-                --from-beginning
+                --from-beginning &
+
+              # keep container alive
+              tail -f /dev/null
           resources:
             requests:
               cpu: "100m"
