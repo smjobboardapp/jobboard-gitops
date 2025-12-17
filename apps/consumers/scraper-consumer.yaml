@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: consumer
-          image: bitnami/kafka:3.7.0
+          image: bitnami/kafka:latest
           command:
             - /bin/bash
             - -c
