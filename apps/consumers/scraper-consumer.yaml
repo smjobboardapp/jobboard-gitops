@@ -15,6 +15,8 @@ spec:
       labels:
         app: scraper-consumer
     spec:
+      nodeSelector:
+        strimzi.io/pool-name: pool-a
       containers:
         - name: consumer
           image: quay.io/strimzi/kafka:0.49.1-kafka-4.1.1
