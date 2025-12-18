@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: grafana.local
+    - host: grafana.au.jobboard.internal
       http:
         paths:
           - path: /
