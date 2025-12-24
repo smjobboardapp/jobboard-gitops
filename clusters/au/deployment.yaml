@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-scraper
+  namespace: scrapers
+  labels:
+    app: java-scraper
+    team: scrapers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-scraper
+  template:
+    metadata:
+      labels:
+        app: java-scraper
+    spec:
+      containers:
+      - name: java-scraper
+        image: ghcr.io/job-sage/java-scraper:v0.1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8082
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8082
+          initialDelaySeconds: 2
+          periodSeconds: 5
